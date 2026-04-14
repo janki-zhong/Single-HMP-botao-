@@ -1,14 +1,17 @@
-## History Repeats Itself: Human Motion Prediction via Motion Attention
+## Fuzzy-Logic Guided Kinematic Prior Model for3D Human Motion Prediction
 This is the code for the paper
 
-Wei Mao, Miaomiao Liu, Mathieu Salzmann. 
-[_History Repeats Itself: Human Motion Prediction via Motion Attention_](https://arxiv.org/abs/2007.11755). In ECCV 20.
+Botao Zhou， Wenming Cao， Wenbin Zou, Jianqi Zhong
+[_Fuzzy-Logic Guided Kinematic Prior Model for3D Human Motion Prediction_]
+
+### Overview
+![architecture](utils/architecture.png)
 
 ### Dependencies
 
-* cuda 10.0
-* Python 3.6
-* [Pytorch](https://github.com/pytorch/pytorch) >1.0.0 (Tested on 1.1.0 and 1.3.0)
+* cuda 12.1
+* Python 3.10
+* [Pytorch] 2.1.0
 
 ### Get the data
 
@@ -54,25 +57,25 @@ Put the all downloaded datasets in ./datasets directory.
 All the running args are defined in [opt.py](utils/opt.py). We use following commands to train on different datasets and representations.
 To train,
 ```bash
-python main_h36m_3d.py --kernel_size 10 --dct_n 20 --input_n 50 --output_n 10 --skip_rate 1 --batch_size 128 --test_batch_size 128 --in_features 66 --num_stage 12
+python main_h36m_3d.py --kernel_size 10 --dct_n 20 --input_n 50 --output_n 10 --skip_rate 1 --batch_size 128 --test_batch_size 128 --in_features 66 --num_stage 14  
 ```
 ```bash
-python main_h36m_ang.py --kernel_size 10 --dct_n 20 --input_n 50 --output_n 10 --skip_rate 1 --batch_size 32 --test_batch_size 32 --in_features 48
+python main_h36m_ang.py --kernel_size 10 --dct_n 20 --input_n 50 --output_n 10 --skip_rate 1 --batch_size 32 --test_batch_size 32 --in_features 48 --num_stage 14
 ```
 ```bash
-python main_amass_3d.py --kernel_size 10 --dct_n 35 --input_n 50 --output_n 25 --skip_rate 5 --batch_size 128 --test_batch_size 128 --in_features 54 
+python main_amass_3d.py --kernel_size 10 --dct_n 35 --input_n 50 --output_n 25 --skip_rate 5 --batch_size 128 --test_batch_size 128 --in_features 54 --num_stage 14
 ```
 ### Evaluation
 To evaluate the pretrained model,
 ```bash
-python main_h36m_3d_eval.py --is_eval --kernel_size 10 --dct_n 20 --input_n 50 --output_n 10 --skip_rate 1 --batch_size 64 --test_batch_size 128 --in_features 66 --ckpt checkpoint/main_h36m_3d_in50_out10_ks10_dctn20
-python main_h36m_3d_eval.py --is_eval --kernel_size 10 --dct_n 20 --input_n 50 --output_n 25 --skip_rate 1 --batch_size 64 --test_batch_size 128 --in_features 66 --ckpt checkpoint/main_h36m_3d_in50_out25_ks10_dctn20
+python main_h36m_3d_eval.py --is_eval --kernel_size 10 --dct_n 20 --input_n 50 --output_n 10 --skip_rate 1 --batch_size 64 --test_batch_size 128 --in_features 66 --num_stage 14 --ckpt checkpoint/main_h36m_3d_in50_out10_ks10_dctn20
+python main_h36m_3d_eval.py --is_eval --kernel_size 10 --dct_n 20 --input_n 50 --output_n 25 --skip_rate 1 --batch_size 64 --test_batch_size 128 --in_features 66 --num_stage 14 --ckpt checkpoint/main_h36m_3d_in50_out25_ks10_dctn20
 ```
 ```bash
-python main_h36m_ang_eval.py --is_eval --kernel_size 10 --dct_n 20 --input_n 50 --output_n 25 --skip_rate 1 --batch_size 32 --test_batch_size 32 --in_features 48 --ckpt ./checkpoint/pretrained/h36m_ang_in50_out10_dctn20/
+python main_h36m_ang_eval.py --is_eval --kernel_size 10 --dct_n 20 --input_n 50 --output_n 25 --skip_rate 1 --batch_size 32 --test_batch_size 32 --in_features 48 --num_stage 14 --ckpt ./checkpoint/pretrained/h36m_ang_in50_out10_dctn20/
 ```
 ```bash
-python main_amass_3d_eval.py --is_eval --kernel_size 10 --dct_n 35 --input_n 50 --output_n 25 --skip_rate 5 --batch_size 128 --test_batch_size 128 --in_features 54 --ckpt ./checkpoint/pretrained/amass_3d_in50_out25_dctn30/
+python main_amass_3d_eval.py --is_eval --kernel_size 10 --dct_n 35 --input_n 50 --output_n 25 --skip_rate 5 --batch_size 128 --test_batch_size 128 --in_features 54 --num_stage 14 --ckpt ./checkpoint/pretrained/amass_3d_in50_out25_dctn30/
 ```
 
 ### Citing
@@ -80,16 +83,16 @@ python main_amass_3d_eval.py --is_eval --kernel_size 10 --dct_n 35 --input_n 50 
 If you use our code, please cite our work
 
 ```
-@inproceedings{wei2020his,
-  title={History Repeats Itself: Human Motion Prediction via Motion Attention},
-  author={Wei, Mao and Miaomiao, Liu and Mathieu, Salzemann},
-  booktitle={ECCV},
-  year={2020}
+@inproceedings{tao2025PDANet,
+  title={Progressively deeper attention networks for 3D human motion prediction},
+  author={Jiangtao Huang, Dong He, Wenming Cao, Jianqi Zhong},
+  booktitle={Multimedia System},
+  year={2025}
 }
 ```
 
 ### Acknowledgments
-The overall code framework (dataloading, training, testing etc.) is adapted from [3d-pose-baseline](https://github.com/una-dinosauria/3d-pose-baseline). 
+The overall code framework (dataloading, training, testing etc.) is adapted from [HisRepItself](https://github.com/wei-mao-2019/HisRepItself). 
 
 The predictor model code is adapted from [LTD](https://github.com/wei-mao-2019/LearnTrajDep).
 
