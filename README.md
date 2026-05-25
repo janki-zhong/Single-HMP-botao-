@@ -1,14 +1,14 @@
-## History Repeats Itself: Human Motion Prediction via Motion Attention
+## Progressively deeper attention networks for 3D human motion prediction
 This is the code for the paper
 
-Wei Mao, Miaomiao Liu, Mathieu Salzmann. 
-[_History Repeats Itself: Human Motion Prediction via Motion Attention_](https://arxiv.org/abs/2007.11755). In ECCV 20.
+Jiangtao Huang, Dong He ,Wenming Cao, Jianqi Zhong
+[_Progressively deeper attention networks for 3D human motion prediction_](https://doi.org/10.1007/s00530-025-01905-3). In Multimedia Systems 2025
 
 ### Dependencies
 
-* cuda 10.0
-* Python 3.6
-* [Pytorch](https://github.com/pytorch/pytorch) >1.0.0 (Tested on 1.1.0 and 1.3.0)
+* cuda 12.1
+* Python 3.10.0
+* [Pytorch](https://github.com/pytorch/pytorch) 2.1.0
 
 ### Get the data
 
@@ -81,10 +81,10 @@ If you use our code, please cite our work
 
 ```
 @inproceedings{wei2020his,
-  title={History Repeats Itself: Human Motion Prediction via Motion Attention},
-  author={Wei, Mao and Miaomiao, Liu and Mathieu, Salzemann},
-  booktitle={ECCV},
-  year={2020}
+  title={Progressively deeper attention networks for 3D human motion prediction},
+  author={Jiangtao Huang, Dong He, Wenming Cao, Jianqi Zhong},
+  booktitle={Multimedia Systems},
+  year={2025}
 }
 ```
 
@@ -94,6 +94,3 @@ The overall code framework (dataloading, training, testing etc.) is adapted from
 The predictor model code is adapted from [LTD](https://github.com/wei-mao-2019/LearnTrajDep).
 
 Some of our evaluation code and data process code was adapted/ported from [Residual Sup. RNN](https://github.com/una-dinosauria/human-motion-prediction) by [Julieta](https://github.com/una-dinosauria). 
-
-### Licence
-MIT
