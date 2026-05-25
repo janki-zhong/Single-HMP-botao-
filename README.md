@@ -1,7 +1,7 @@
 ## Fuzzy-Logic Guided Kinematic Prior Model for3D Human Motion Prediction
 This is the code for the paper
 
-Botao Zhou， Wenming Cao， Wenbin Zou, Jianqi Zhong
+Botao Zhou, Wenming Cao, Wenbin Zou, Jianqi Zhong
 [_Fuzzy-Logic Guided Kinematic Prior Model for3D Human Motion Prediction_]
 
 ### Overview
