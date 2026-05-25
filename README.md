@@ -4,8 +4,10 @@ This is the code for the paper
 Jiangtao Huang, Dong He ,Wenming Cao, Jianqi Zhong
 [_Progressively deeper attention networks for 3D human motion prediction_](https://doi.org/10.1007/s00530-025-01905-3). In Multimedia Systems 2025
 
-### Dependencies
+### Overview
+![architecture](utils/architecture.png)
 
+### Dependencies
 * cuda 12.1
 * Python 3.10.0
 * [Pytorch](https://github.com/pytorch/pytorch) 2.1.0
