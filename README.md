@@ -1,8 +1,8 @@
 ## 运动学引导的双流模糊学习的人体动作预测
 This is the code for the paper
 
-Botao Zhou, Jianqi Zhong, Wenming Cao, Wenbin Zou. 
-[_Kinematics-guided Dual-stream Fuzzy Learning for Human Motion Prediction_]. In 计算机应用.
+Botao Zhou, Wenbin Zou, Jianqi Zhong, Wenming Cao. 
+[_Kinematics-guided Dual-stream Fuzzy Learning method for human motion Prediction_]. In 计算机应用.
 
 ### Dependencies
 
