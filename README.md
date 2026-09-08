@@ -1,4 +1,4 @@
-## 运动学引导的双流模糊学习的人体动作预测
+## 运动学引导双流模糊学习的人体动作预测方法
 This is the code for the paper
 
 Botao Zhou, Wenbin Zou, Jianqi Zhong, Wenming Cao. 
