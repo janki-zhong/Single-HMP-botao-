@@ -1,0 +1,136 @@
+from utils import cmumotion3d as datasets
+from model import AttModel
+from utils.opt import Options
+from utils import util
+from utils import log
+
+from torch.utils.data import DataLoader
+import torch
+import torch.nn as nn
+import numpy as np
+import time
+import torch.optim as optim
+
+# python main_cmu_3d_eval.py --is_eval --kernel_size 10 --dct_n 20 --input_n 50 --output_n 25 --ckpt ./checkpoint/pretrained/cmu_model_path/
+
+def main(opt):
+    print('>>> create models')
+
+    in_features = opt.in_features
+    d_model = opt.d_model
+    kernel_size = opt.kernel_size
+    dev = opt.dev
+    net_pred = AttModel.AttModel(in_features=in_features, kernel_size=kernel_size, d_model=d_model,
+                                 num_stage=opt.num_stage, dct_n=opt.dct_n, output_n=opt.output_n)
+    net_pred.to(dev)
+
+    model_path_len = '{}/ckpt_best.pth.tar'.format(opt.ckpt)
+    print(">>> loading ckpt len from '{}'".format(model_path_len))
+
+    if torch.cuda.is_available():
+        ckpt = torch.load(model_path_len, map_location=torch.device(dev))
+    else:
+        ckpt = torch.load(model_path_len, map_location=torch.device('cpu'))
+
+    dirty_state_dict = ckpt['state_dict']
+    clean_state_dict = {
+        k: v for k, v in dirty_state_dict.items()
+        if not (k.endswith('total_ops') or k.endswith('total_params'))
+    }
+    net_pred.load_state_dict(clean_state_dict, strict=True)
+    print(">>> ckpt len loaded (epoch: {} | err: {})".format(ckpt['epoch'], ckpt['err']))
+
+    print('>>> loading datasets')
+
+    head = np.array(['act'])
+    for k in range(1, opt.output_n + 1):
+        head = np.append(head, [f'#{k}'])
+
+    acts = ["basketball", "basketball_signal", "directing_traffic", "jumping",
+            "running", "soccer", "walking", "washwindow"]
+
+    errs = np.zeros([len(acts) + 1, opt.output_n])
+
+    for i, act in enumerate(acts):
+        test_dataset = datasets.Datasets(opt, split=1, actions=act)
+        print('>>> Testing dataset length for {}: {:d}'.format(act, test_dataset.__len__()))
+
+        test_loader = DataLoader(test_dataset, batch_size=opt.test_batch_size, shuffle=False, num_workers=0,
+                                 pin_memory=False)
+
+        ret_test = run_model(net_pred, is_train=3, data_loader=test_loader, opt=opt)
+
+        print('testing error ({}): {:.3f}'.format(act, ret_test[f'#{opt.output_n}']))
+
+        ret_log = np.array([])
+        for k in ret_test.keys():
+            ret_log = np.append(ret_log, [ret_test[k]])
+        errs[i] = ret_log
+
+    errs[-1] = np.mean(errs[:-1], axis=0)
+
+    acts_column = np.expand_dims(np.array(acts + ["average"]), axis=1)
+    value = np.concatenate([acts_column, errs.astype(np.str_)], axis=1)
+
+    print("\n--- Final Results ---")
+    print(value)
+
+    log.save_csv_log(opt, head, value, is_create=True, file_name='test_cmu_action_eval')
+
+
+def run_model(net_pred, optimizer=None, is_train=0, data_loader=None, epo=1, opt=None):
+    net_pred.eval()
+    titles = np.array(range(opt.output_n)) + 1
+    m_p3d_cmu = np.zeros([opt.output_n])
+    n = 0
+    in_n = opt.input_n
+    out_n = opt.output_n
+    dev = opt.dev
+
+    dim_used = data_loader.dataset.dim_used
+    joint_num = len(dim_used) // 3
+
+    joint_to_ignore = np.array([16, 20, 29, 24, 27, 33, 36])
+    index_to_ignore = np.concatenate((joint_to_ignore * 3, joint_to_ignore * 3 + 1, joint_to_ignore * 3 + 2))
+    joint_equal = np.array([15, 15, 15, 23, 23, 32, 32])
+    index_to_equal = np.concatenate((joint_equal * 3, joint_equal * 3 + 1, joint_equal * 3 + 2))
+
+    itera = 1
+
+    for i, p3d_cmu in enumerate(data_loader):
+        batch_size, seq_n, all_dim = p3d_cmu.shape
+        n += batch_size
+
+        p3d_cmu = p3d_cmu.float().to(dev)
+
+        p3d_src = p3d_cmu[:, :, dim_used]
+
+        with torch.no_grad():
+            p3d_out_all = net_pred(p3d_src, input_n=in_n, output_n=out_n, itera=itera, dev=dev, is_train=is_train,
+                                   bs_i=i)
+
+        p3d_out_all = p3d_out_all.reshape([batch_size, out_n, itera, joint_num, 3])
+        p3d_out_valid = p3d_out_all[:, :, 0].reshape(batch_size, out_n, len(dim_used))
+        p3d_out_full = p3d_cmu[:, -out_n:].clone()
+        p3d_out_full[:, :, dim_used] = p3d_out_valid
+        p3d_out_full[:, :, index_to_ignore] = p3d_out_full[:, :, index_to_equal]
+        p3d_out_full = p3d_out_full.reshape([batch_size, out_n, all_dim // 3, 3])
+        p3d_sup_full = p3d_cmu[:, -out_n:].reshape([batch_size, out_n, all_dim // 3, 3])
+        mpjpe_p3d = torch.sum(torch.mean(torch.norm(p3d_sup_full - p3d_out_full, dim=3), dim=2), dim=0)
+        m_p3d_cmu += mpjpe_p3d.cpu().data.numpy()
+
+    ret = {}
+    m_p3d_cmu = m_p3d_cmu / n
+    for j in range(out_n):
+        ret["#{:d}".format(titles[j])] = m_p3d_cmu[j]
+
+    return ret
+
+
+if __name__ == '__main__':
+    option = Options().parse()
+    option.cuda_idx = option.dev
+    option.in_features = 75
+    option.is_eval = True
+
+    main(option)
